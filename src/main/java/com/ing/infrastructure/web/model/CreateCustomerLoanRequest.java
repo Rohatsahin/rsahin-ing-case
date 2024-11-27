@@ -5,6 +5,7 @@ import com.ing.domain.values.Installment;
 import com.ing.domain.values.InterestRate;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 public record CreateCustomerLoanRequest(
         BigDecimal amount,
@@ -16,7 +17,8 @@ public record CreateCustomerLoanRequest(
         return new CreateLoanCommand(
                 amount,
                 new InterestRate(interestRate),
-                new Installment(installmentsCount)
+                new Installment(installmentsCount),
+                Instant.now()
         );
     }
 }

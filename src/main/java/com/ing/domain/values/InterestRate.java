@@ -10,7 +10,7 @@ public record InterestRate(
 
     public InterestRate {
         if (value.compareTo(minInterestRate) < 0 || value.compareTo(maxInterestRate) > 0) {
-            throw new DomainException("Interest value must be between " + minInterestRate + " and " + maxInterestRate);
+            throw new DomainException("interest value must be between " + minInterestRate + " and " + maxInterestRate);
         }
     }
 }

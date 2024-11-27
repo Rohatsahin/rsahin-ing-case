@@ -1,7 +1,7 @@
 package com.ing.domain.loan;
 
+import com.ing.domain.commands.CreateLoanCommand;
 import com.ing.domain.values.Installment;
-import com.ing.domain.values.InterestRate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -20,32 +21,41 @@ public record Loan(
         Long id,
         Long customerId,
         BigDecimal amount,
-        Installment installment,
+        Installment numberOfInstallment,
         Instant createdDate,
 
         // Loan Associations
         Collection<LoanInstallment> installments
 ) {
 
+    // this is in fly identifier persistence managed by external systems
+    private static final ThreadLocalRandom ID_IDENTIFIER = ThreadLocalRandom.current();
+
     private static final Integer MAXIMUM_PAID_INSTALLMENT_IN_SAME_TIME = 3;
 
-    public static Loan create(Long customerId, BigDecimal amount, Installment installment, InterestRate rate) {
-        var creationDate = Instant.now();
-        var totalAmount = amount.multiply(BigDecimal.valueOf(1 + rate.value()));
-        var installmentAmount = totalAmount.divide(BigDecimal.valueOf(installment.count()), RoundingMode.CEILING);
+    // total amount formula = A = P(1 + ri)
+    public static Loan create(Long customerId, CreateLoanCommand command) {
+        var loanId = ID_IDENTIFIER.nextLong(0, Long.MAX_VALUE);
+        var creationDate = command.creationDate();
 
-        var installments = IntStream.range(1, installment.count())
+        var totalAmount = command.amount().multiply(BigDecimal.ONE.add(
+                BigDecimal.valueOf(command.rate().value()).multiply(BigDecimal.valueOf(command.installment().monthToYear())))
+        );
+
+        var installmentAmount = totalAmount.divide(BigDecimal.valueOf(command.installment().count()), RoundingMode.CEILING);
+
+        var installments = IntStream.rangeClosed(1, command.installment().count())
                 .mapToObj(inst -> {
-                    var creationLocalDate = creationDate.atZone(ZoneOffset.UTC).toLocalDate();
-                    var installmentDueDate = creationLocalDate.withMonth(creationLocalDate.getMonthValue() + inst)
+                    var installmentDueDate = creationDate.atZone(ZoneOffset.UTC).toLocalDate()
+                            .plusMonths(inst)
                             .withDayOfMonth(1)
                             .atStartOfDay()
                             .toInstant(ZoneOffset.UTC);
 
-                    return LoanInstallment.create(null, installmentAmount, installmentDueDate);
+                    return LoanInstallment.create(loanId, installmentAmount, installmentDueDate);
                 }).toList();
 
-        return new Loan(null, customerId, amount, installment, creationDate, installments);
+        return new Loan(loanId, customerId, command.amount(), command.installment(), creationDate, installments);
     }
 
 
@@ -63,7 +73,7 @@ public record Loan(
             var paymentResult = installment.pay(paymentAmount, paymentDate);
 
             if (paymentResult.isPresent()) {
-                paidInstallments.put(installment.id(), installment);
+                paidInstallments.put(installment.id(), paymentResult.get());
             } else {
                 break;
             }
@@ -76,7 +86,7 @@ public record Loan(
         var totalAmountSpent = paidInstallments.values().stream().map(LoanInstallment::paidAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return new LoanPaymentResult(
-                new Loan(id, customerId, amount, installment, createdDate, finalizedInstallments),
+                new Loan(id, customerId, amount, numberOfInstallment, createdDate, finalizedInstallments),
                 numberOfPaidInstallments,
                 inCome,
                 totalAmountSpent

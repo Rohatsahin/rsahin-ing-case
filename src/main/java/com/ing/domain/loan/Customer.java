@@ -1,8 +1,8 @@
 package com.ing.domain.loan;
 
+import com.ing.domain.DomainException;
 import com.ing.domain.commands.CreateLoanCommand;
 import com.ing.domain.commands.PayLoanCommand;
-import com.ing.domain.DomainException;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -26,9 +26,9 @@ public record Customer(
             throw new DomainException("insufficient credit limit");
         }
 
-
         var customerLoans = new HashMap<>(loans);
-        customerLoans.put(null, Loan.create(this.id, command.amount(), command.installment(), command.rate()));
+        Loan createdLoan = Loan.create(this.id, command);
+        customerLoans.put(createdLoan.id(), createdLoan);
 
         return new Customer(id, name, surname, creditLimit, customerLoans);
     }
