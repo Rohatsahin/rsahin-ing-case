@@ -39,19 +39,19 @@ public class SecurityConfiguration {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        UserDetails user1 = User.withDefaultPasswordEncoder()
-                .username("customer_1")
+        var user1 = User.withDefaultPasswordEncoder()
+                .username("lorem")
                 .password("password")
-                .authorities("ROLE_CUSTOMER", "op_customer_1")
+                .authorities("ROLE_CUSTOMER", "op_customer_100")
                 .build();
 
-        UserDetails user2 = User.withDefaultPasswordEncoder()
-                .username("customer_2")
+        var user2 = User.withDefaultPasswordEncoder()
+                .username("quis")
                 .password("password")
-                .authorities("ROLE_CUSTOMER", "op_customer_2")
+                .authorities("ROLE_CUSTOMER", "op_customer_101")
                 .build();
 
-        UserDetails admin = User.withDefaultPasswordEncoder()
+        var admin = User.withDefaultPasswordEncoder()
                 .username("admin")
                 .password("password")
                 .authorities("ROLE_ADMIN")

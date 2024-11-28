@@ -1,5 +1,8 @@
 package com.ing.infrastructure.persistence.relational.entitiy;
 
+import com.ing.domain.loan.Loan;
+import com.ing.domain.loan.LoanInstallment;
+import com.ing.domain.values.Installment;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,6 +12,7 @@ import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Entity
 @Table(name = "loan")
@@ -36,13 +40,41 @@ public class LoanEntity {
     public LoanEntity() {
     }
 
-    public LoanEntity(Long id, Long customerId, BigDecimal amount, Integer numberOfInstallment, Instant createdDate, Boolean isPaid) {
+    public LoanEntity(Long id,
+                      Long customerId,
+                      BigDecimal amount,
+                      Integer numberOfInstallment,
+                      Instant createdDate,
+                      Boolean isPaid
+    ) {
         this.id = id;
         this.customerId = customerId;
         this.amount = amount;
         this.numberOfInstallment = numberOfInstallment;
         this.createdDate = createdDate;
         this.isPaid = isPaid;
+    }
+
+    public static LoanEntity fromLoan(Long customerId, Loan loan) {
+        return new LoanEntity(
+                loan.id(),
+                customerId,
+                loan.amount(),
+                loan.numberOfInstallment().count(),
+                loan.createdDate(),
+                loan.isPaid()
+        );
+    }
+
+    public static Loan fromLoanEntity(Long customerId, LoanEntity loan, List<LoanInstallment> installments) {
+        return new Loan(
+                loan.getId(),
+                customerId,
+                loan.getAmount(),
+                new Installment(loan.getNumberOfInstallment()),
+                loan.getCreatedDate(),
+                installments
+        );
     }
 
     public Long getId() {

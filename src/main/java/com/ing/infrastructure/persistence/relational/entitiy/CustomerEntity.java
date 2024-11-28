@@ -1,5 +1,7 @@
 package com.ing.infrastructure.persistence.relational.entitiy;
 
+import com.ing.domain.loan.Customer;
+import com.ing.domain.loan.Loan;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,6 +10,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "customer")
@@ -32,12 +37,37 @@ public class CustomerEntity {
     public CustomerEntity() {
     }
 
-    public CustomerEntity(Long id, String name, String surname, BigDecimal creditLimit, BigDecimal usedCreditLimit) {
+    public CustomerEntity(Long id,
+                          String name,
+                          String surname,
+                          BigDecimal creditLimit,
+                          BigDecimal usedCreditLimit
+    ) {
         this.id = id;
         this.name = name;
         this.surname = surname;
         this.creditLimit = creditLimit;
         this.usedCreditLimit = usedCreditLimit;
+    }
+
+    public static CustomerEntity fromCustomer(Customer customer) {
+        return new CustomerEntity(
+                customer.id(),
+                customer.name(),
+                customer.surname(),
+                customer.creditLimit(),
+                customer.getUsedCreditLimit()
+        );
+    }
+
+    public static Customer fromCustomerEntity(CustomerEntity entity, List<Loan> loans) {
+        return new Customer(
+                entity.getId(),
+                entity.getName(),
+                entity.getSurname(),
+                entity.getCreditLimit(),
+                new HashMap<>(loans.stream().collect(Collectors.toMap(Loan::id, loan -> loan)))
+        );
     }
 
     public Long getId() {

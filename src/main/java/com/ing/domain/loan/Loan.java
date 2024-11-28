@@ -24,9 +24,7 @@ public record Loan(
         BigDecimal amount,
         Installment numberOfInstallment,
         Instant createdDate,
-
-        // Loan Associations
-        Collection<LoanInstallment> installments
+        Collection<LoanInstallment> installments // Loan Associations
 ) {
 
     // this is in fly identifier persistence managed by external systems
@@ -39,9 +37,9 @@ public record Loan(
         var loanId = ID_IDENTIFIER.nextLong(0, Long.MAX_VALUE);
         var creationDate = command.creationDate();
 
-        var totalAmount = command.amount().multiply(BigDecimal.ONE.add(
-                BigDecimal.valueOf(command.rate().value()).multiply(BigDecimal.valueOf(command.installment().monthToYear())))
-        );
+        var totalAmount = command.amount()
+                .multiply(BigDecimal.ONE.add(BigDecimal.valueOf(command.rate().value()).multiply(BigDecimal.valueOf(command.installment().monthToYear()))))
+                .setScale(2, RoundingMode.CEILING);
 
         var installmentAmount = totalAmount.divide(BigDecimal.valueOf(command.installment().count()), RoundingMode.CEILING);
 
@@ -68,8 +66,9 @@ public record Loan(
         var paidInstallments = new HashMap<Long, LoanInstallment>();
 
         for (LoanInstallment installment : availableInstallments()) {
-            var paidInstallmentsAmount = paidInstallments.values().stream().map(LoanInstallment::paidAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
-            var paymentAmount = inCome.subtract(paidInstallmentsAmount);
+            var paidInstallmentsAmount = paidInstallments.values().stream()
+                    .map(LoanInstallment::paidAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+            var paymentAmount = inCome.subtract(paidInstallmentsAmount).setScale(2, RoundingMode.CEILING);
 
             var paymentResult = installment.pay(paymentAmount, paymentDate);
 
@@ -84,7 +83,8 @@ public record Loan(
                 .map(installment -> paidInstallments.getOrDefault(installment.id(), installment))
                 .toList();
         var numberOfPaidInstallments = paidInstallments.values().size();
-        var totalAmountSpent = paidInstallments.values().stream().map(LoanInstallment::paidAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        var totalAmountSpent = paidInstallments.values().stream()
+                .map(LoanInstallment::paidAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return new LoanPaymentResult(
                 new Loan(id, customerId, amount, numberOfInstallment, createdDate, finalizedInstallments),

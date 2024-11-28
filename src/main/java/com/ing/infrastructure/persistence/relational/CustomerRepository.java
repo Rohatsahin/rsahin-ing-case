@@ -2,21 +2,20 @@ package com.ing.infrastructure.persistence.relational;
 
 import com.ing.domain.DomainRepository;
 import com.ing.domain.loan.Customer;
-import com.ing.domain.loan.Loan;
-import com.ing.domain.loan.LoanInstallment;
-import com.ing.domain.values.Installment;
-import com.ing.infrastructure.persistence.relational.entitiy.CustomerEntity;
-import com.ing.infrastructure.persistence.relational.entitiy.LoanEntity;
-import com.ing.infrastructure.persistence.relational.entitiy.LoanInstallmentEntity;
 import com.ing.infrastructure.persistence.relational.repository.CustomerEntityRepository;
 import com.ing.infrastructure.persistence.relational.repository.LoanEntityRepository;
 import com.ing.infrastructure.persistence.relational.repository.LoanInstallmentEntityRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import static com.ing.infrastructure.persistence.relational.entitiy.CustomerEntity.fromCustomer;
+import static com.ing.infrastructure.persistence.relational.entitiy.CustomerEntity.fromCustomerEntity;
+import static com.ing.infrastructure.persistence.relational.entitiy.LoanEntity.fromLoan;
+import static com.ing.infrastructure.persistence.relational.entitiy.LoanEntity.fromLoanEntity;
+import static com.ing.infrastructure.persistence.relational.entitiy.LoanInstallmentEntity.formInstallment;
+import static com.ing.infrastructure.persistence.relational.entitiy.LoanInstallmentEntity.formInstallmentEntity;
 
 @Repository
 public class CustomerRepository implements DomainRepository<Customer, Long> {
@@ -42,64 +41,29 @@ public class CustomerRepository implements DomainRepository<Customer, Long> {
                     .map(ln -> {
                         var installments = loanInstallmentEntityRepository.findAllByLoanId(ln.getId());
 
-                        return new Loan(
-                                ln.getId(),
-                                ln.getCustomerId(),
-                                ln.getAmount(),
-                                new Installment(ln.getNumberOfInstallment()),
-                                ln.getCreatedDate(),
-                                installments.stream()
-                                        .map(inst -> new LoanInstallment(
-                                                        inst.getId(), inst.getLoanId(), inst.getAmount(),
-                                                        inst.getDueDate(), inst.getPaidAmount(), inst.getPaymentDate()
-                                                )
-                                        ).toList()
+                        return fromLoanEntity(
+                                customerId,
+                                ln,
+                                installments.stream().map(inst -> formInstallmentEntity(ln.getId(), inst)).toList()
                         );
-                    }).collect(Collectors.toMap(Loan::id, loan -> loan));
+                    }).toList();
 
-            return new Customer(
-                    customer.getId(),
-                    customer.getName(),
-                    customer.getSurname(),
-                    customer.getCreditLimit(),
-                    new HashMap<>(loans));
+            return fromCustomerEntity(customer, loans);
         });
     }
 
     @Transactional
     @Override
     public void save(Customer customer) {
-        var customerEntity = new CustomerEntity(
-                customer.id(),
-                customer.name(),
-                customer.surname(),
-                customer.creditLimit(),
-                customer.getUsedCreditLimit()
-        );
+        var savedCustomer = customerEntityRepository.save(fromCustomer(customer));
 
-        customerEntityRepository.save(customerEntity);
+        customer.loans().values()
+                .forEach(loan -> {
+                    var savedLoan = loanEntityRepository.save(fromLoan(savedCustomer.getId(), loan));
 
-        customer.loans().values().forEach(loan -> {
-            LoanEntity savedLoan = loanEntityRepository.save(new LoanEntity(
-                    loan.id(),
-                    loan.customerId(),
-                    loan.amount(),
-                    loan.numberOfInstallment().count(),
-                    loan.createdDate(),
-                    loan.isPaid()
-            ));
-
-            loan.installments().forEach(installment -> {
-                loanInstallmentEntityRepository.save(new LoanInstallmentEntity(
-                        installment.id(),
-                        savedLoan.getId(),
-                        installment.amount(),
-                        installment.dueDate(),
-                        installment.paidAmount(),
-                        installment.paymentDate(),
-                        installment.isPaid()
-                ));
-            });
-        });
+                    loan.installments().forEach(
+                            installment -> loanInstallmentEntityRepository.save(formInstallment(savedLoan.getId(), installment))
+                    );
+                });
     }
 }

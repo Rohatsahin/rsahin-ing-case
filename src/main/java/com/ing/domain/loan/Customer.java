@@ -4,7 +4,6 @@ import com.ing.domain.DomainException;
 import com.ing.domain.commands.CreateLoanCommand;
 import com.ing.domain.commands.PayLoanCommand;
 import com.ing.domain.commands.results.CustomerPaymentResult;
-import com.ing.domain.commands.results.LoanPaymentResult;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -16,9 +15,7 @@ public record Customer(
         String name,
         String surname,
         BigDecimal creditLimit,
-
-        // Customer Loan Space
-        HashMap<Long, Loan> loans
+        HashMap<Long, Loan> loans // Customer Loan Space
 ) {
 
     public Customer createLoan(CreateLoanCommand command) {
@@ -29,7 +26,7 @@ public record Customer(
         }
 
         var customerLoans = new HashMap<>(loans);
-        Loan createdLoan = Loan.create(this.id, command);
+        var createdLoan = Loan.create(this.id, command);
         customerLoans.put(createdLoan.id(), createdLoan);
 
         return new Customer(id, name, surname, creditLimit, customerLoans);
@@ -40,7 +37,7 @@ public record Customer(
         var loan = customerLoans.get(command.loanId());
 
         if (loan != null) {
-            LoanPaymentResult paymentResult = loan.payInstallments(command.inCome(), command.paymentDate());
+            var paymentResult = loan.payInstallments(command.inCome(), command.paymentDate());
 
             var finalizedLoans = new HashMap<>(customerLoans);
             finalizedLoans.put(command.loanId(), paymentResult.loan());

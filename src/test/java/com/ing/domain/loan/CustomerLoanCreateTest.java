@@ -20,7 +20,7 @@ class CustomerLoanCreateTest {
 
     @BeforeEach
     public void setUp() {
-        currentDate = Instant.parse("2024-11-28T11:00:00.000000Z");
+        currentDate = Instant.parse("2024-11-25T11:00:00.000000Z");
     }
 
     @Test

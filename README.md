@@ -78,8 +78,8 @@ swagger [Swagger](http://localhost:8080/swagger-ui/index.html)
 The application comes with build in customer and admin operator. The credentials as a below for testing purpose
 
 ```
- -- CUSTOMER_1 --; username: customer_1 password: password
- -- CUSTOMER_2 --; username: customer_2 password: password
+ -- CUSTOMER_1 --; username: lorem password: password userid: 100 creditlimit: 10000
+ -- CUSTOMER_2 --; username: quis  password: password userid: 101 creditlimit: 11000
  
  -- ADMIN --; username: admin password: password
 

@@ -6,11 +6,10 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 public record PayCustomerLoanRequest(
-        Long loanId,
         BigDecimal amount
 ) {
 
-    public PayLoanCommand toCommand() {
+    public PayLoanCommand toCommand(Long loanId) {
         return new PayLoanCommand(
                 loanId,
                 amount,

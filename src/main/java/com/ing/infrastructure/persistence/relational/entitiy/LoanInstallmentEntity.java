@@ -1,5 +1,6 @@
 package com.ing.infrastructure.persistence.relational.entitiy;
 
+import com.ing.domain.loan.LoanInstallment;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -39,7 +40,14 @@ public class LoanInstallmentEntity {
     public LoanInstallmentEntity() {
     }
 
-    public LoanInstallmentEntity(Long id, Long loanId, BigDecimal amount, Instant dueDate, BigDecimal paidAmount, Instant paymentDate, Boolean isPaid) {
+    public LoanInstallmentEntity(Long id,
+                                 Long loanId,
+                                 BigDecimal amount,
+                                 Instant dueDate,
+                                 BigDecimal paidAmount,
+                                 Instant paymentDate,
+                                 Boolean isPaid
+    ) {
         this.id = id;
         this.loanId = loanId;
         this.amount = amount;
@@ -47,6 +55,29 @@ public class LoanInstallmentEntity {
         this.paidAmount = paidAmount;
         this.paymentDate = paymentDate;
         this.isPaid = isPaid;
+    }
+
+    public static LoanInstallmentEntity formInstallment(Long loanId, LoanInstallment installment) {
+        return new LoanInstallmentEntity(
+                installment.id(),
+                loanId,
+                installment.amount(),
+                installment.dueDate(),
+                installment.paidAmount(),
+                installment.paymentDate(),
+                installment.isPaid()
+        );
+    }
+
+    public static LoanInstallment formInstallmentEntity(Long loanId, LoanInstallmentEntity installment) {
+        return new LoanInstallment(
+                installment.getId(),
+                loanId,
+                installment.getAmount(),
+                installment.getDueDate(),
+                installment.getPaidAmount(),
+                installment.getPaymentDate()
+        );
     }
 
     public Long getId() {

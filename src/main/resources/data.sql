@@ -33,5 +33,5 @@ CREATE TABLE IF NOT EXISTS loan_installment
     CONSTRAINT fk_loan FOREIGN KEY (loan_id) REFERENCES loan (id) ON DELETE CASCADE
 );
 
-INSERT INTO customer(id, name, surname, credit_limit, used_credit_limit) VALUES (1, 'Customer_1', 'SurName', 10000, 0);
-INSERT INTO customer(id, name, surname, credit_limit, used_credit_limit) VALUES (2, 'Customer_2', 'SurName', 10000, 0);
+INSERT INTO customer(id, name, surname, credit_limit, used_credit_limit) VALUES (100, 'Lorem', 'Ipsum', 10000, 0);
+INSERT INTO customer(id, name, surname, credit_limit, used_credit_limit) VALUES (101, 'Quis', 'Autem', 11000, 0);

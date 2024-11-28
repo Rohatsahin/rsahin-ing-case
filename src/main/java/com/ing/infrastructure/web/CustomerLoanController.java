@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Collection;
 
 @RestController
-@RequestMapping("/v1/customers/{customerId}/loan")
+@RequestMapping("/v1/customers/{customerId}/loans")
 public class CustomerLoanController {
 
     private final CustomerLoanService customerLoanService;
@@ -35,11 +35,12 @@ public class CustomerLoanController {
         customerLoanService.createLoan(customerId, request.toCommand());
     }
 
-    @PostMapping("pay")
+    @PostMapping("{loanId}/pay")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("(hasRole('CUSTOMER') and hasAuthority('op_customer_' + #customerId)) or hasRole('ADMIN')")
-    public ResponseEntity<PayCustomerLoanResponse> payLoan(@PathVariable("customerId") Long customerId, @RequestBody PayCustomerLoanRequest request) {
-        var paymentResult = customerLoanService.payLoan(customerId, request.toCommand());
+    public ResponseEntity<PayCustomerLoanResponse> payLoan(@PathVariable("customerId") Long customerId, @PathVariable("loanId") Long loanId,
+                                                           @RequestBody PayCustomerLoanRequest request) {
+        var paymentResult = customerLoanService.payLoan(customerId, request.toCommand(loanId));
         return ResponseEntity.ofNullable(new PayCustomerLoanResponse(paymentResult));
     }
 

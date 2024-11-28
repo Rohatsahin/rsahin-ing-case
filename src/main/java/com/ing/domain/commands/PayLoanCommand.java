@@ -9,6 +9,5 @@ public record PayLoanCommand(
        BigDecimal inCome,
        Instant paymentDate
 ) {
-
 }
 
