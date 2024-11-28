@@ -1,6 +1,7 @@
 package com.ing.domain.loan;
 
 import com.ing.domain.commands.CreateLoanCommand;
+import com.ing.domain.commands.results.LoanPaymentResult;
 import com.ing.domain.values.Installment;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -102,7 +103,7 @@ public record Loan(
                 .subList(0, MAXIMUM_PAID_INSTALLMENT_IN_SAME_TIME);
     }
 
-    Boolean isPaid() {
+    public Boolean isPaid() {
         return installments.stream()
                 .allMatch(LoanInstallment::isPaid);
     }

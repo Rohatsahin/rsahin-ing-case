@@ -1,7 +1,6 @@
 package com.ing.infrastructure.web.model;
 
-
-import com.ing.domain.loan.CustomerPaymentResult;
+import com.ing.domain.commands.results.CustomerPaymentResult;
 
 import java.math.BigDecimal;
 

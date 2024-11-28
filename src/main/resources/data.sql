@@ -1,4 +1,4 @@
-CREATE TABLE customer
+CREATE TABLE IF NOT EXISTS customer
 (
     id                BIGINT AUTO_INCREMENT PRIMARY KEY,
     name              varchar NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE customer
     used_credit_limit BIGINT  NOT NULL
 );
 
-CREATE TABLE loan
+CREATE TABLE IF NOT EXISTS loan
 (
     id                    BIGINT AUTO_INCREMENT PRIMARY KEY,
     customer_id           BIGINT                   NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE loan
 );
 
 
-CREATE TABLE loanInstallment
+CREATE TABLE IF NOT EXISTS loan_installment
 (
     id           BIGINT AUTO_INCREMENT PRIMARY KEY,
     loan_id      BIGINT                   NOT NULL,
@@ -33,5 +33,5 @@ CREATE TABLE loanInstallment
     CONSTRAINT fk_loan FOREIGN KEY (loan_id) REFERENCES loan (id) ON DELETE CASCADE
 );
 
-INSERT INTO customer VALUES (1, 'Customer_1', 'SurName', 10000, 0);
-INSERT INTO customer VALUES (2, 'Customer_2', 'SurName', 10000, 0);
+INSERT INTO customer(id, name, surname, credit_limit, used_credit_limit) VALUES (1, 'Customer_1', 'SurName', 10000, 0);
+INSERT INTO customer(id, name, surname, credit_limit, used_credit_limit) VALUES (2, 'Customer_2', 'SurName', 10000, 0);

@@ -52,7 +52,7 @@ public record LoanInstallment(
         }
     }
 
-    Boolean isPaid() {
+    public Boolean isPaid() {
         return paidAmount != null && paymentDate != null;
     }
 

@@ -3,9 +3,9 @@ package com.ing.service;
 import com.ing.domain.DomainException;
 import com.ing.domain.commands.CreateLoanCommand;
 import com.ing.domain.commands.PayLoanCommand;
-import com.ing.domain.loan.CustomerPaymentResult;
+import com.ing.domain.commands.results.CustomerPaymentResult;
 import com.ing.domain.loan.Loan;
-import com.ing.infrastructure.repository.CustomerRepository;
+import com.ing.infrastructure.persistence.relational.CustomerRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -25,6 +25,7 @@ public class CustomerLoanService {
         if (customer.isPresent()) {
             var result = customer.get().createLoan(command);
             customerRepository.save(result);
+            return;
         }
 
         throw new DomainException("Customer not found");

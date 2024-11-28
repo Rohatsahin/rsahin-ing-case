@@ -3,6 +3,8 @@ package com.ing.domain.loan;
 import com.ing.domain.DomainException;
 import com.ing.domain.commands.CreateLoanCommand;
 import com.ing.domain.commands.PayLoanCommand;
+import com.ing.domain.commands.results.CustomerPaymentResult;
+import com.ing.domain.commands.results.LoanPaymentResult;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -55,7 +57,7 @@ public record Customer(
         }
     }
 
-    BigDecimal getUsedCreditLimit() {
+    public BigDecimal getUsedCreditLimit() {
         return loans.values().stream().map(Loan::amount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }

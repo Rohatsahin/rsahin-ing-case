@@ -1,4 +1,6 @@
-package com.ing.domain.loan;
+package com.ing.domain.commands.results;
+
+import com.ing.domain.loan.Loan;
 
 import java.math.BigDecimal;
 
